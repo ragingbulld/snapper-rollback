@@ -52,7 +52,7 @@ if [ -z "$BTRFS_PATH" ]; then
     echo "错误: 无法从btrfs输出中提取路径信息"
     exit 1
 fi
-echo $BTRFS_PATH
+
 # 查询btrfs-assistant快照ID
 BA_SNAPSHOT_INFO=$(btrfs-assistant -l | grep "$BTRFS_PATH")
 if [ -z "$BA_SNAPSHOT_INFO" ]; then
