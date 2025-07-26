@@ -82,8 +82,8 @@ else
     exit 1
 fi
 
-# 查找并删除btrfs-assistant创建的备份子卷
-BACKUP_SUBVOLS=$(btrfs subvolume list "$(dirname "$SUBVOLUME")" 2>/dev/null | grep "${SUBVOLUME_DIR}_backup_" | awk '{print $9}')
-for subvol in $BACKUP_SUBVOLS; do
-    btrfs subvolume delete "$(dirname "$SUBVOLUME")/$subvol" >/dev/null 2>&1
+# 删除btrfs-assistant创建的备份子卷
+find "$(dirname "$SUBVOLUME")" -maxdepth 1 -type d -name "$(basename "$SUBVOLUME")_backup_*" 2>/dev/null | while read -r backup_path; do
+    btrfs subvolume delete "$backup_path" >/dev/null 2>&1
 done
+echo "清理完成！"
