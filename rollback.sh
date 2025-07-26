@@ -35,13 +35,32 @@ echo "子卷路径: $SUBVOLUME"
 echo "子卷目录名: $SUBVOLUME_DIR"
 echo "回滚到快照: $SNAPSHOT_NUM"
 
-# 查找对应的btrfs-assistant快照ID
-BA_SNAPSHOT_ID=$(btrfs-assistant -l | grep "${SUBVOLUME_DIR}/.snapshots/${SNAPSHOT_NUM}/snapshot" | awk '{print $1}')
+# 构建snapper快照路径
+SNAPPER_SNAPSHOT_PATH="${SUBVOLUME}/.snapshots/${SNAPSHOT_NUM}/snapshot"
 
-if [ -z "$BA_SNAPSHOT_ID" ]; then
-    echo "错误: 找不到配置 '$CONFIG_NAME' 的快照 $SNAPSHOT_NUM 对应的 btrfs-assistant ID"
+# 使用btrfs subvolume show获取完整路径信息
+BTRFS_SHOW_OUTPUT=$(btrfs subvolume show "$SNAPPER_SNAPSHOT_PATH" 2>/dev/null)
+if [ $? -ne 0 ]; then
+    echo "错误: 无法获取快照 $SNAPSHOT_NUM 的信息"
     exit 1
 fi
+
+# 提取第一行路径信息
+BTRFS_PATH=$(echo "$BTRFS_SHOW_OUTPUT" | head -n1 | awk '{print $1}')
+
+if [ -z "$BTRFS_PATH" ]; then
+    echo "错误: 无法从btrfs输出中提取路径信息"
+    exit 1
+fi
+echo $BTRFS_PATH
+# 查询btrfs-assistant快照ID
+BA_SNAPSHOT_INFO=$(btrfs-assistant -l | grep "$BTRFS_PATH")
+if [ -z "$BA_SNAPSHOT_INFO" ]; then
+    echo "错误: 找不到快照 $SNAPSHOT_NUM 对应的 btrfs-assistant 记录"
+    exit 1
+fi
+
+BA_SNAPSHOT_ID=$(echo "$BA_SNAPSHOT_INFO" | awk '{print $1}')
 
 echo "找到对应的 btrfs-assistant 快照 ID: $BA_SNAPSHOT_ID"
 
