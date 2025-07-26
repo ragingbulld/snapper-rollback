@@ -86,4 +86,3 @@ fi
 find "$(dirname "$SUBVOLUME")" -maxdepth 1 -type d -name "$(basename "$SUBVOLUME")_backup_*" 2>/dev/null | while read -r backup_path; do
     btrfs subvolume delete "$backup_path" >/dev/null 2>&1
 done
-echo "清理完成！"
