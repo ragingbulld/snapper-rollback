@@ -90,6 +90,8 @@ else
     echo "没有找到需要终止的进程"
 fi
 
+sleep 2  # 给进程一些时间关闭
+
 # 执行回滚操作
 echo "正在执行回滚操作..."
 btrfs-assistant -r "$BA_SNAPSHOT_ID" >/dev/null 2>&1
